@@ -1,0 +1,19 @@
+.model MAG6
+.inputs A5 A4 A3 A2 A1 A0 B5 B4 B3 B2 B1 B0
+.outputs O
+.subckt XOR1 A=A5 B=B5 O=O5
+.subckt XOR1 A=A4 B=B4 O=O4
+.subckt XOR1 A=A3 B=B3 O=O3
+.subckt XOR1 A=A2 B=B2 O=O2
+.subckt XOR1 A=A1 B=B1 O=O1
+.subckt XOR1 A=A0 B=B0 O=O0
+.names A5 A4 A3 A2 A1 A0 O5 O4 O3 O2 O1 O0 O
+1-----1----- 1
+-1----01---- 1
+--1---001--- 1
+---1--0001-- 1
+----1-00001- 1
+-----1000001 1
+.search XOR1.blif
+.end
+

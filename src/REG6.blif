@@ -1,0 +1,11 @@
+.model REG6
+.inputs A5 A4 A3 A2 A1 A0
+.outputs O5 O4 O3 O2 O1 O0
+.subckt REG1 A=A5 O=O5
+.subckt REG1 A=A4 O=O4
+.subckt REG1 A=A3 O=O3
+.subckt REG1 A=A2 O=O2
+.subckt REG1 A=A1 O=O1
+.subckt REG1 A=A0 O=O0
+.search REG1.blif
+.end

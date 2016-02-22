@@ -1,0 +1,140 @@
+.model DATAPATH
+
+# INPUT: SPEED[8] RUOTE[1]X4 RESTART[1]
+.inputs SPD7 SPD6 SPD5 SPD4 SPD3 SPD2 SPD1 SPD0 ROTDXF ROTSXF ROTDXR ROTSXR RESTART
+
+# OUTPUT: START LIGHT
+.outputs START LIGHT
+
+# COST 0
+.subckt ZERO1 OUTPUT=X
+
+# COST 1
+.subckt UNO1 OUTPUT=Y
+
+#################################
+############# SPEED #############
+################################# 
+
+# MAGGIORATORE[8]: ha come entrate SPEED[8] e il valore 10km/h (00001010 in binario); se la 
+# velocità è maggiore di 10km/h (00001010 in binario) vengono attivati i multiplexer delle ruote 
+# e START esce dal DATAPATH entrando nella FSM con valore 1
+.subckt MAG8 A7=SPD7 A6=SPD6 A5=SPD5 A4=SPD4 A3=SPD3 A2=SPD2 A1=SPD1 A0=SPD0 B7=X B6=X B5=X B4=X B3=Y B2=X B1=Y B0=X O=START
+
+#################################
+############# RESET #############
+#################################
+
+# OR[1]: riceve come entrate il RESTART dalla FSM e l'uscita del comparatore che confronta i giri 
+# della ruota di riferimento ROTDXF con il valore 50 (110010 in binario) per segnalare i 100m
+# percorsi necessari a resettare tutti i conteggi di giri
+.subckt OR1 A=RESTART B=ACTIVE O=RESET
+
+#################################
+############# ROTDXF ############
+#################################
+
+# MULTIPLEXER[1]: viene attivato quando la velocità è maggiore di 10km/h (00001010 in binario) e 
+# riceve in entrata il valore binario 1 corrisponendente ad un singolo giro di ruota; se la 
+# velocità non è maggiore di 00001010 riceve in entrata 0
+.subckt MUX1 SEL=START A=ROTDXF B=X O=ROTDXF-1
+
+# COMPARATORE[1]: ha come due entrate l'uscita del relativo multiplexer e 1; ha uscita 1 ogni 
+# volta che la ruota compie un giro completo, ovvero quando vengono percorsi 2m
+.subckt XNOR1 A=ROTDXF-1 B=Y O=ROTDXF-2
+
+# SOMMATORE[6]: ha come due entrate l'uscita del comparatore e il valore binario proveniente dal 
+# registro che memorizza i giri di ruota compiuti in precedenza; il suo compito é quello di 
+# contare i giri di ruota
+.subckt SOM6 A5=X A4=X A3=X A2=X A1=X A0=ROTDXF-2 B5=ADD5-1 B4=ADD4-1 B3=ADD3-1 B2=ADD2-1 B1=ADD1-1 B0=ADD0-1 O5=RIS5-1 O4=RIS4-1 O3=RIS3-1 O2=RIS2-1 O1=RIS1-1 O0=RIS0-1
+
+# MULTIPLEXER[6]: serve per resettare il conteggio dei giri di ruota, e quindi il registro, nel 
+# momento in cui sono stati compiuti 100m oppure se si ha RESTART uguale ad 1
+.subckt MUX6 SEL=RESET A5=X A4=X A3=X A2=X A1=X A0=X B5=RIS5-1 B4=RIS4-1 B3=RIS3-1 B2=RIS2-1 B1=RIS1-1 B0=RIS0-1 O5=REG5-1 O4=REG4-1 O3=REG3-1 O2=REG2-1 O1=REG1-1 O0=REG0-1
+
+# REGISTRO[6]: serve per memorizzare i giri di ruota compiuti
+.subckt REG6 A5=REG5-1 A4=REG4-1 A3=REG3-1 A2=REG2-1 A1=REG1-1 A0=REG0-1 O5=ADD5-1 O4=ADD4-1 O3=ADD3-1 O2=ADD2-1 O1=ADD1-1 O0=ADD0-1
+
+# COMPARATORE[6]: confronta i giri di ruota con il valore 49 (110001 in binario) per verificare 
+# se siano stati percorsi 100m
+.subckt COMP6 A5=Y A4=Y A3=X A2=X A1=X A0=Y B5=ADD5-1 B4=ADD4-1 B3=ADD3-1 B2=ADD2-1 B1=ADD1-1 B0=ADD0-1 O=ACTIVE
+
+#################################
+############# ROTSXF ############
+#################################
+
+.subckt MUX1 SEL=START A=ROTSXF B=X O=ROTSXF-1
+.subckt XNOR1 A=ROTSXF-1 B=Y O=ROTSXF-2
+.subckt SOM6 A5=X A4=X A3=X A2=X A1=X A0=ROTSXF-2 B5=ADD5-2 B4=ADD4-2 B3=ADD3-2 B2=ADD2-2 B1=ADD1-2 B0=ADD0-2 O5=RIS5-2 O4=RIS4-2 O3=RIS3-2 O2=RIS2-2 O1=RIS1-2 O0=RIS0-2
+.subckt MUX6 SEL=RESET A5=X A4=X A3=X A2=X A1=X A0=X B5=RIS5-2 B4=RIS4-2 B3=RIS3-2 B2=RIS2-2 B1=RIS1-2 B0=RIS0-2 O5=REG5-2 O4=REG4-2 O3=REG3-2 O2=REG2-2 O1=REG1-2 O0=REG0-2
+.subckt REG6 A5=REG5-2 A4=REG4-2 A3=REG3-2 A2=REG2-2 A1=REG1-2 A0=REG0-2 O5=SUM5-2 O4=SUM4-2 O3=SUM3-2 O2=SUM2-2 O1=SUM1-2 O0=SUM0-2
+.subckt DEM6 SELECT=ACTIVE I5=SUM5-2 I4=SUM4-2 I3=SUM3-2 I2=SUM2-2 I1=SUM1-2 I0=SUM0-2 A5=INT5-2 A4=INT4-2 A3=INT3-2 A2=INT2-2 A1=INT1-2 A0=INT0-2 B5=ADD5-2 B4=ADD4-2 B3=ADD3-2 B2=ADD2-2 B1=ADD1-2 B0=ADD0-2
+.subckt MAG6 A5=INT5-2 A4=INT4-2 A3=INT3-2 A2=INT2-2 A1=INT1-2 A0=INT0-2 B5=Y B4=X B3=X B2=Y B1=Y B0=Y O=MAGGIORE-2
+.subckt MAG6 A5=Y A4=Y A3=Y A2=Y A1=X A0=Y B5=INT5-2 B4=INT4-2 B3=INT3-2 B2=INT2-2 B1=INT1-2 B0=INT0-2 O=MINORE-2
+.subckt XOR1 A=MAGGIORE-2 B=MINORE-2 O=CON1
+
+#################################
+############# ROTDXR ############
+#################################
+
+.subckt MUX1 SEL=START A=ROTDXR B=X O=ROTDXR-1
+.subckt XNOR1 A=ROTDXR-1 B=Y O=ROTDXR-2
+.subckt SOM6 A5=X A4=X A3=X A2=X A1=X A0=ROTDXR-2 B5=ADD5-3 B4=ADD4-3 B3=ADD3-3 B2=ADD2-3 B1=ADD1-3 B0=ADD0-3 O5=RIS5-3 O4=RIS4-3 O3=RIS3-3 O2=RIS2-3 O1=RIS1-3 O0=RIS0-3
+.subckt MUX6 SEL=RESET A5=X A4=X A3=X A2=X A1=X A0=X B5=RIS5-3 B4=RIS4-3 B3=RIS3-3 B2=RIS2-3 B1=RIS1-3 B0=RIS0-3 O5=REG5-3 O4=REG4-3 O3=REG3-3 O2=REG2-3 O1=REG1-3 O0=REG0-3
+.subckt REG6 A5=REG5-3 A4=REG4-3 A3=REG3-3 A2=REG2-3 A1=REG1-3 A0=REG0-3 O5=SUM5-3 O4=SUM4-3 O3=SUM3-3 O2=SUM2-3 O1=SUM1-3 O0=SUM0-3
+.subckt DEM6 SELECT=ACTIVE I5=SUM5-3 I4=SUM4-3 I3=SUM3-3 I2=SUM2-3 I1=SUM1-3 I0=SUM0-3 A5=INT5-3 A4=INT4-3 A3=INT3-3 A2=INT2-3 A1=INT1-3 A0=INT0-3 B5=ADD5-3 B4=ADD4-3 B3=ADD3-3 B2=ADD2-3 B1=ADD1-3 B0=ADD0-3
+.subckt MAG6 A5=INT5-3 A4=INT4-3 A3=INT3-3 A2=INT2-3 A1=INT1-3 A0=INT0-3 B5=Y B4=X B3=X B2=Y B1=Y B0=Y O=MAGGIORE-3
+.subckt MAG6 A5=Y A4=Y A3=Y A2=Y A1=X A0=Y B5=INT5-3 B4=INT4-3 B3=INT3-3 B2=INT2-3 B1=INT1-3 B0=INT0-3 O=MINORE-3
+.subckt XOR1 A=MAGGIORE-3 B=MINORE-3 O=CON2
+
+#################################
+############# ROTSXR ############
+#################################
+
+.subckt MUX1 SEL=START A=ROTSXR B=X O=ROTSXR-1
+.subckt XNOR1 A=ROTSXR-1 B=Y O=ROTSXR-2
+.subckt SOM6 A5=X A4=X A3=X A2=X A1=X A0=ROTSXR-2 B5=ADD5-4 B4=ADD4-4 B3=ADD3-4 B2=ADD2-4 B1=ADD1-4 B0=ADD0-4 O5=RIS5-4 O4=RIS4-4 O3=RIS3-4 O2=RIS2-4 O1=RIS1-4 O0=RIS0-4
+.subckt MUX6 SEL=RESET A5=X A4=X A3=X A2=X A1=X A0=X B5=RIS5-4 B4=RIS4-4 B3=RIS3-4 B2=RIS2-4 B1=RIS1-4 B0=RIS0-4 O5=REG5-4 O4=REG4-4 O3=REG3-4 O2=REG2-4 O1=REG1-4 O0=REG0-4
+.subckt REG6 A5=REG5-4 A4=REG4-4 A3=REG3-4 A2=REG2-4 A1=REG1-4 A0=REG0-4 O5=SUM5-4 O4=SUM4-4 O3=SUM3-4 O2=SUM2-4 O1=SUM1-4 O0=SUM0-4
+.subckt DEM6 SELECT=ACTIVE I5=SUM5-4 I4=SUM4-4 I3=SUM3-4 I2=SUM2-4 I1=SUM1-4 I0=SUM0-4 A5=INT5-4 A4=INT4-4 A3=INT3-4 A2=INT2-4 A1=INT1-4 A0=INT0-4 B5=ADD5-4 B4=ADD4-4 B3=ADD3-4 B2=ADD2-4 B1=ADD1-4 B0=ADD0-4
+.subckt MAG6 A5=INT5-4 A4=INT4-4 A3=INT3-4 A2=INT2-4 A1=INT1-4 A0=INT0-4 B5=Y B4=X B3=X B2=Y B1=Y B0=Y O=MAGGIORE-4
+.subckt MAG6 A5=Y A4=Y A3=Y A2=Y A1=X A0=Y B5=INT5-4 B4=INT4-4 B3=INT3-4 B2=INT2-4 B1=INT1-4 B0=INT0-4 O=MINORE-4
+.subckt XOR1 A=MAGGIORE-4 B=MINORE-4 O=CON3
+
+#################################
+############ CONFRONTO ##########
+################################# 
+
+.subckt OR1 A=CON1 B=CON2 O=OR1
+.subckt OR1 A=OR1 B=CON3 O=OR2
+
+#################################
+############## RESET ############
+#################################
+
+.subckt NOT1 A=ACTIVE O=NOT
+.subckt MUX1 SEL=NOT A=LIGHT B=OR2 O=END
+
+#################################
+############## LIGHT ############
+#################################
+
+.subckt REG1 A=END O=LIGHT
+	
+.search COMP6.blif
+.search MUX1.blif
+.search MUX6.blif
+.search MAG6.blif
+.search MAG8.blif
+.search DEM1.blif
+.search DEM6.blif
+.search REG1.blif
+.search REG6.blif
+.search ZERO1.blif
+.search UNO1.blif
+.search SOM1.blif
+.search SOM6.blif
+.search OR1.blif
+.search XOR1.blif
+.search NOT1.blif
+.search XNOR1.blif

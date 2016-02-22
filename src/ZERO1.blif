@@ -1,0 +1,5 @@
+.model ZERO1
+.outputs OUTPUT
+.names OUTPUT
+.end
+

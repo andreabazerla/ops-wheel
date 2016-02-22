@@ -1,0 +1,9 @@
+.model DEM1
+.inputs SEL I
+.outputs A B
+.names I SEL A
+11 1
+.names I SEL B
+10 1
+.end
+

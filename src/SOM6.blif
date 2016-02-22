@@ -1,0 +1,13 @@
+.model SOM6
+.inputs A5 A4 A3 A2 A1 A0 B5 B4 B3 B2 B1 B0
+.outputs O5 O4 O3 O2 O1 O0 COUT
+.subckt ZERO1 OUTPUT=X				
+.subckt SOM1 A=A0 B=B0 CIN=X O=O0 COUT=C0
+.subckt SOM1 A=A1 B=B1 CIN=C0 O=O1 COUT=C1
+.subckt SOM1 A=A2 B=B2 CIN=C1 O=O2 COUT=C2
+.subckt SOM1 A=A3 B=B3 CIN=C2 O=O3 COUT=C3
+.subckt SOM1 A=A4 B=B4 CIN=C3 O=O4 COUT=C4
+.subckt SOM1 A=A5 B=B5 CIN=C4 O=O5 COUT=COUT
+.search ZERO1.blif
+.search SOM1.blif
+.end

@@ -1,0 +1,50 @@
+.model FSM
+.inputs STEERING RESET START LIGHT
+.outputs RESTART
+.latch    [8] LatchOut_v4   0
+.latch    [9] LatchOut_v5   0
+.start_kiss
+.i 4
+.o 1
+.p 18
+.s 4
+.r PARK
+0-00 PARK PARK 0
+-1-- PARK PARK 0
+0010 PARK MOVE 0
+10-0 PARK CURVE 1
+-0-1 PARK LIGHT 0
+0010 MOVE MOVE 0
+1010 MOVE CURVE 1
+-0-1 MOVE LIGHT 0
+--00 MOVE PARK 0
+-1-- MOVE PARK 0
+10-0 CURVE CURVE 1
+0010 CURVE MOVE 0
+0-00 CURVE PARK 1
+-1-- CURVE PARK 1
+-0-1 CURVE LIGHT 0
+-0-1 LIGHT LIGHT 0
+---0 LIGHT PARK 1
+-1-- LIGHT PARK 1
+.end_kiss
+.latch_order LatchOut_v4 LatchOut_v5
+.code PARK 00
+.code MOVE 01
+.code CURVE 10
+.code LIGHT 11
+.names STEERING RESET START LIGHT LatchOut_v4 LatchOut_v5 [8]
+-0-1-- 1
+10-0-0 1
+10100- 1
+.names STEERING RESET START LIGHT LatchOut_v4 LatchOut_v5 [9]
+-0-1-- 1
+001-0- 1
+001--0 1
+.names STEERING RESET START LIGHT LatchOut_v4 LatchOut_v5 RESTART
+-1--1- 1
+--001- 1
+---011 1
+10-0-0 1
+10100- 1
+.end

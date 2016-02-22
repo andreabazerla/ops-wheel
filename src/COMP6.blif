@@ -1,0 +1,13 @@
+.model COMP6
+.inputs A5 A4 A3 A2 A1 A0 B5 B4 B3 B2 B1 B0
+.outputs O
+.subckt XNOR1 A=A5 B=B5 O=O5
+.subckt XNOR1 A=A4 B=B4 O=O4
+.subckt XNOR1 A=A3 B=B3 O=O3
+.subckt XNOR1 A=A2 B=B2 O=O2
+.subckt XNOR1 A=A1 B=B1 O=O1
+.subckt XNOR1 A=A0 B=B0 O=O0
+.names O5 O4 O3 O2 O1 O0 O
+111111 1
+.search XNOR1.blif
+.end 
