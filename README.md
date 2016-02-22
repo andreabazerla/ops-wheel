@@ -7,4 +7,4 @@ Car system to signal a wheel punctured on display created in **SIS** with **docu
 
 ## License
 Created by [@AndreaBazerla](https://twitter.com/AndreaBazerla)  
-Released under [The MIT License](https://github.com/andbaz/carmenu/blob/a78656f1263e4c209bae9076c2b797d720a2e8da/LICENSE.md)
+Released under [The MIT License](https://github.com/andbaz/opswheel/blob/7cb6a7313342c62da11fe50492739f00fe23deff/LICENSE.md)
